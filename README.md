@@ -39,4 +39,4 @@ $ python3 path/main.py
 
 ## Цель проекта:
 Проект написан в образовательных целях в рамках прохождения курса [API веб-сервисов](https://dvmn.org/modules/web-api)
-платформы [DevMan](https://dvmn.org/)# vk_meme_autopost
+платформы [DevMan](https://dvmn.org/)
