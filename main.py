@@ -46,13 +46,13 @@ def upload_photo_to_server_to_wall(file_name, upload_uri):
     return response.json()
 
 
-def upload_photo_to_wall(server, photo, hash):
+def upload_photo_to_wall(server, photo, hash, token):
     params = {
         'group_id': GROUP_ID,
         'photo': photo,
         'server': server,
         'hash': hash,
-        'access_token': VK_KEY,
+        'access_token': token,
         'v': API_VERSION,
     }
     response = requests.post('{}photos.saveWallPhoto?'.format(VK_URL), data=params)
@@ -86,7 +86,7 @@ if __name__ == '__main__':
     on_server_photo = upload_photo_to_server_to_wall('meme.png', upload_url)
     os.remove('meme.png')
     server, photo, hash = on_server_photo['server'], on_server_photo['photo'], on_server_photo['hash']
-    uploaded_photo = upload_photo_to_wall(server, photo, hash)
+    uploaded_photo = upload_photo_to_wall(server, photo, hash, VK_KEY)
     upload_media_id = uploaded_photo['response'][0]['id']
     upload_owner_id = uploaded_photo['response'][0]['owner_id']
     post_photo_to_wall(upload_owner_id, upload_media_id, comic_description, VK_KEY)
