@@ -75,7 +75,8 @@ def post_photo_to_wall(owner_id, media_id, description, token):
 
 
 if __name__ == '__main__':
-    comic_id = random.randint(0, 614)
+    last_comic = fetch_comic('')['num']
+    comic_id = random.randint(0, last_comic)
     comic_url = fetch_comic(comic_id)['img']
     fetch_image(comic_url, 'meme', 'png')
     comic_description = fetch_comic(comic_id)['alt']
