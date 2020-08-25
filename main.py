@@ -3,22 +3,21 @@ from dotenv import load_dotenv
 import os
 import random
 
-
 API_VERSION = 5.122
 VK_URL = 'https://api.vk.com/method/'
 GROUP_ID = 198065570
 
 
-def fetch_comic(id):
-    response = requests.get('http://xkcd.com/{}/info.0.json'.format(id))
-    python_meme = response.json()
-    return python_meme
+def fetch_comic(comic_num):
+    response = requests.get('http://xkcd.com/{}/info.0.json'.format(comic_num))
+    response.raise_for_status()
+    return response.json()
 
 
-def fetch_image(url, name, format):
+def fetch_image(url, name, resolution):
     response = requests.get(url)
     response.raise_for_status()
-    with open('{}.{}'.format(name, format), 'wb') as file:
+    with open('{}.{}'.format(name, resolution), 'wb') as file:
         file.write(response.content)
 
 
@@ -46,12 +45,12 @@ def upload_photo_to_server_to_wall(file_name, upload_uri):
     return response.json()
 
 
-def upload_photo_to_wall(server, photo, hash, token):
+def upload_photo_to_wall(server_num, photo_url, hash_num, token):
     params = {
         'group_id': GROUP_ID,
-        'photo': photo,
-        'server': server,
-        'hash': hash,
+        'photo': photo_url,
+        'server': server_num,
+        'hash': hash_num,
         'access_token': token,
         'v': API_VERSION,
     }
@@ -77,16 +76,21 @@ def post_photo_to_wall(owner_id, media_id, description, token):
 if __name__ == '__main__':
     last_comic = fetch_comic('')['num']
     comic_id = random.randint(0, last_comic)
-    comic_url = fetch_comic(comic_id)['img']
-    fetch_image(comic_url, 'meme', 'png')
-    comic_description = fetch_comic(comic_id)['alt']
+    comic_json = fetch_comic(comic_id)
+    fetch_image(comic_json['img'], 'meme', 'png')
+    comic_description = comic_json['alt']
     load_dotenv()
-    VK_KEY = os.getenv('TOKEN')
-    upload_url = get_server_to_upload_image(VK_KEY, GROUP_ID)['response']['upload_url']
+    vk_key = os.getenv('VK_TOKEN')
+    upload_url = get_server_to_upload_image(vk_key, GROUP_ID)['response']['upload_url']
     on_server_photo = upload_photo_to_server_to_wall('meme.png', upload_url)
-    os.remove('meme.png')
-    server, photo, hash = on_server_photo['server'], on_server_photo['photo'], on_server_photo['hash']
-    uploaded_photo = upload_photo_to_wall(server, photo, hash, VK_KEY)
+    try:
+        os.remove('meme.png')
+    except Exception:
+        print('error, please retry later')
+    finally:
+        os.remove('meme.png')
+    server, photo, hash_id = on_server_photo['server'], on_server_photo['photo'], on_server_photo['hash']
+    uploaded_photo = upload_photo_to_wall(server, photo, hash_id, vk_key)
     upload_media_id = uploaded_photo['response'][0]['id']
     upload_owner_id = uploaded_photo['response'][0]['owner_id']
-    post_photo_to_wall(upload_owner_id, upload_media_id, comic_description, VK_KEY)
+    post_photo_to_wall(upload_owner_id, upload_media_id, comic_description, vk_key)

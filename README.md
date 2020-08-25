@@ -24,7 +24,7 @@ $ pip install -r requirements.txt
    - Получить [VK_ACCESS_TOKEN](https://vk.com/dev/implicit_flow_group) для Вашего сообщества
    - Создать в файле переменную с названием TOKEN:
         ```sh
-        TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+        VK_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
         ```
 
 6. Узнать id группы, в которую будут загружаться коммисксы, вписать его в переменную GROUP_ID в main.py
