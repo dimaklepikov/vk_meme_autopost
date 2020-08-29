@@ -21,12 +21,16 @@ def fetch_image(url, name, resolution):
         file.write(response.content)
 
 
+def except_error(response):
+    if 'error' in response:
+        raise requests.exceptions.HTTPError(response['error'])
+
+
 def get_vk_groups_list(token):
     params = {'access_token': token, 'v': API_VERSION}
     response = requests.get('{}groups.get'.format(VK_URL), params=params)
     response_data = response.json()
-    if 'error' in response_data:
-        raise requests.exceptions.HTTPError(response_data['error'])
+    except_error(response_data)
     return response_data
 
 
@@ -34,8 +38,7 @@ def get_server_to_upload_image(token, group_id):
     params = {'group_id': group_id, 'access_token': token, 'v': API_VERSION}
     response = requests.get('{}photos.getWallUploadServer/'.format(VK_URL), params=params)
     response_data = response.json()
-    if 'error' in response_data:
-        raise requests.exceptions.HTTPError(response_data['error'])
+    except_error(response_data)
     return response_data
 
 
@@ -47,8 +50,7 @@ def upload_photo_to_server_to_wall(file_name, upload_uri):
         response = requests.post(upload_uri, files=files)
         response.raise_for_status()
     response_data = response.json()
-    if 'error' in response_data:
-        raise requests.exceptions.HTTPError(response_data['error'])
+    except_error(response_data)
     return response_data
 
 
@@ -64,8 +66,7 @@ def upload_photo_to_wall(server_num, photo_url, hash_num, token):
     response = requests.post('{}photos.saveWallPhoto?'.format(VK_URL), data=params)
     response.raise_for_status()
     response_data = response.json()
-    if 'error' in response_data:
-        raise requests.exceptions.HTTPError(response_data['error'])
+    except_error(response_data)
     return response_data
 
 
@@ -80,8 +81,7 @@ def post_photo_to_wall(owner_id, media_id, description, token):
     }
     response = requests.post('{}wall.post?'.format(VK_URL), data=params)
     response_data = response.json()
-    if 'error' in response_data:
-        raise requests.exceptions.HTTPError(response_data['error'])
+    except_error(response_data)
     return response_data
 
 
@@ -92,8 +92,8 @@ if __name__ == '__main__':
     fetch_image(fetched_comic['img'], 'meme', 'png')
     comic_description = fetched_comic['alt']
     load_dotenv()
+    vk_key = os.getenv('VK_TOKEN')
     try:
-        vk_key = os.getenv('VK_TOKEN')
         upload_url = get_server_to_upload_image(vk_key, GROUP_ID)['response']['upload_url']
         on_server_photo = upload_photo_to_server_to_wall('meme.png', upload_url)
         server, photo, hash_id = on_server_photo['server'], on_server_photo['photo'], on_server_photo['hash']
@@ -101,8 +101,5 @@ if __name__ == '__main__':
         upload_media_id = uploaded_photo['response'][0]['id']
         upload_owner_id = uploaded_photo['response'][0]['owner_id']
         post_photo_to_wall(upload_owner_id, upload_media_id, comic_description, vk_key)
-    except Exception:
-        raise ValueError('Sth went wrong, please retry')
     finally:
         os.remove('meme.png')
-
